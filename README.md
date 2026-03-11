@@ -1,6 +1,6 @@
 # 🔤 Coptic Transliteration Tool with AI Enhancement
 
-> A modern web-based tool for transliterating Coptic text to Latin script, enhanced with Google's Gemini 2.0 Flash Lite AI model. **Live Application:** (https://coptic-transliterator-llm.streamlit.app/)
+> A modern web-based tool for transliterating Coptic text to Latin script, enhanced with Google's Gemini 2.5 Flash Lite AI model. **Live Application:** (https://coptic-transliterator-llm.streamlit.app/)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
@@ -9,12 +9,12 @@
 
 ## ✨ Features
 
-- **🖊️ Flexible Input**: Enter Coptic text directly or upload `.txt` files
-- **✨ AI-Enhanced**: Combines rule-based transliteration with Google's Gemini 2.0 Flash Lite model for superior accuracy
-- **📊 Side-by-Side Comparison**: View both rule-based and AI-enhanced results simultaneously
-- **📱 User-Friendly**: Clean, mobile-responsive Streamlit interface
-- **⬇️ Export Ready**: Download individual or combined transliteration results as `.txt` files
-- **🚀 Fast & Reliable**: Rule-based fallback ensures the tool always works
+- **🖊️ Flexible Input**: Enter Coptic text directly or upload `.txt` files.
+- **✨ AI-Enhanced**: Combines rule-based transliteration with Google's Gemini 2.5 Flash Lite model for superior accuracy and context-aware results.
+- **📊 Side-by-Side Comparison**: View both rule-based and AI-enhanced results simultaneously.
+- **📱 User-Friendly**: Clean, modern Streamlit interface.
+- **⬇️ Export Ready**: Download individual or combined transliteration results as `.txt` files.
+- **🚀 Fast & Reliable**: Rule-based fallback ensures the tool always works even if the API is unreachable.
 
 ---
 
@@ -23,7 +23,7 @@
 ### Prerequisites
 
 - [Python 3.9+](https://www.python.org/downloads/)
-- Google AI Studio API key (for AI enhancement - optional)
+- Google Gemini API key (for AI enhancement - optional)
 
 ### Local Setup
 
@@ -72,14 +72,14 @@
 ```
 ┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
 │   Streamlit     │    │  Rule-based      │    │  Google Gemini  │
-│   Frontend      │───▶│  Transliterator  │───▶│  2.0 Flash Lite │
+│   Frontend      │───▶│  Transliterator  │───▶│  2.5 Flash Lite │
 │                 │    │  (Always Works)  │    │  (Enhancement)  │
 └─────────────────┘    └──────────────────┘    └─────────────────┘
 ```
 
 - **Frontend**: Streamlit provides the web interface with side-by-side comparison
 - **Core Logic**: Rule-based transliteration ensures reliability
-- **Enhancement**: Gemini 2.0 Flash Lite model via Google AI Studio API
+- **Enhancement**: Gemini 2.5 Flash Lite model via Google AI Studio API
 
 ---
 
@@ -105,12 +105,19 @@ coptic-transliterator-llm/
 |----------|-------------|----------|---------|
 | `GEMINI_API_KEY` | Google AI Studio API key for AI enhancement | No | Rule-based only |
 
-### Model Configuration
+### SDK Configuration
 
-The tool uses Google's Gemini 2.0 Flash Lite model for AI enhancement. The model endpoint is configured in `app.py`:
+The tool uses the official google-genai SDK for API communication, replacing raw HTTP requests. The client is initialized in app.py:
 
 ```python
-GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite-001:generateContent"
+from google import genai
+
+client = genai.Client(api_key=GEMINI_API_KEY)
+response = client.models.generate_content(
+    model="gemini-2.5-flash-lite",
+    contents=prompt,
+    config=...
+)
 ```
 
 ---
@@ -135,6 +142,7 @@ print(latin_text)  # Output: pnoute
 - **Character Mappings**: Modify `char_map` in `transliterator.py`
 - **Contextual Rules**: Update `_apply_contextual_rules()` method
 - **UI Styling**: Customize CSS in `app.py`
+- **System Instructions**: Modify the system_instruction prompt in app.py to adjust how the LLM formats the output.
 
 ---
 

@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Simple Coptic to Latin transliterator that doesn't use Pynini
+Optimized Coptic to Latin transliterator
+Aligns with ASCII-only standard transliteration conventions and 
+incorporates Greco-Bohairic contextual phonetic rules.
 """
 
 import re
@@ -10,131 +12,112 @@ import unicodedata
 
 class CopticTransliterator:
     def __init__(self):
-        # Basic character mappings
+        # Streamlined to lowercase only.
+        # Note: ⲭ (Chi) is removed from the static map as it is fully handled by regex rules.
         self.char_map = {
             "ⲁ": "a",
-            "Ⲁ": "A",
             "ⲃ": "b",
-            "Ⲃ": "B",
             "ⲅ": "g",
-            "Ⲅ": "G",
             "ⲇ": "d",
-            "Ⲇ": "D",
             "ⲉ": "e",
-            "Ⲉ": "E",
-            "ⲋ": "f",
-            "Ⲋ": "F",
             "ⲍ": "z",
-            "Ⲍ": "Z",
-            "ⲏ": "i",
-            "Ⲏ": "I",
+            # Standardized to 'e' to match LLM examples (like tekklesia)
+            "ⲏ": "e",
             "ⲑ": "th",
-            "Ⲑ": "TH",
             "ⲓ": "i",
-            "Ⲓ": "I",
             "ⲕ": "k",
-            "Ⲕ": "K",
             "ⲗ": "l",
-            "Ⲗ": "L",
             "ⲙ": "m",
-            "Ⲙ": "M",
             "ⲛ": "n",
-            "Ⲛ": "N",
             "ⲝ": "x",
-            "Ⲝ": "X",
             "ⲟ": "o",
-            "Ⲟ": "O",
             "ⲡ": "p",
-            "Ⲡ": "P",
             "ⲣ": "r",
-            "Ⲣ": "R",
             "ⲥ": "s",
-            "Ⲥ": "S",
             "ⲧ": "t",
-            "Ⲧ": "T",
             "ⲩ": "u",
-            "Ⲩ": "U",
             "ⲫ": "ph",
-            "Ⲫ": "PH",
-            "ⲭ": "ch",
-            "Ⲭ": "CH",
             "ⲯ": "ps",
-            "Ⲯ": "PS",
-            "ⲱ": "o",
-            "Ⲱ": "O",
+            "ⲱ": "o",   # ASCII representation of Omega
             "ϣ": "sh",
-            "Ϣ": "SH",
             "ϥ": "f",
-            "Ϥ": "F",
             "ϧ": "kh",
-            "Ϧ": "KH",
             "ϩ": "h",
-            "Ϩ": "H",
             "ϫ": "j",
-            "Ϫ": "J",
-            "ϭ": "ky",
-            "Ϭ": "KY",
+            "ϭ": "ch",  # Shima is standardly mapped to ch (as in church)
             "ϯ": "ti",
-            "Ϯ": "TI",
+            "ⲋ": "6",   # Soou is the number 6, not 'f'
         }
 
     def translit(self, text):
         """
         Transliterate Coptic text to Latin script
         """
-        # Normalize input to decompose combining characters
-        text = unicodedata.normalize("NFKD", text)
-        # Remove combining diacritics (e.g., supralinear stroke)
+        if not text:
+            return ""
+
+        # 1. Normalize input to decompose combining characters and lowercase immediately
+        text = unicodedata.normalize("NFKD", text).lower()
+
+        # 2. Handle the Jinkim (grave accent \u0300) before stripping other diacritics.
+        # When over a consonant, it adds an 'e' sound before it (e.g., ⲛ̀ -> en).
+        text = re.sub(r"([ⲃⲅⲇⲍⲑⲕⲗⲙⲛⲝⲡⲣⲥⲧⲫⲭⲯϣϥϧϩϫϭϯ])\u0300", r"e\1", text)
+
+        # 3. Remove any remaining combining diacritics (e.g., supralinear strokes over vowels)
         text = "".join(c for c in text if not unicodedata.combining(c))
-        # Apply contextual rules first (similar to original pynini rules)
-        result = self._apply_contextual_rules(text.lower())
 
-        # Apply basic character mappings
+        # 4. Apply advanced contextual phonetic rules
+        result = self._apply_contextual_rules(text)
+
+        # 5. Apply basic character mappings for everything else
         for coptic_char, latin_char in self.char_map.items():
-            result = result.replace(coptic_char.lower(), latin_char.lower())
+            result = result.replace(coptic_char, latin_char)
 
-        # Replace any remaining unmapped Coptic characters with a placeholder or warning
-        unmapped = "".join(c for c in result if ord(c) >= 0x2C80 and ord(c) <= 0x2CFF)
+        # 6. Warn about unmapped Coptic characters (Unicode blocks 2C80-2CFF and 03E2-03EF)
+        unmapped = "".join(c for c in result if (
+            0x2C80 <= ord(c) <= 0x2CFF) or (0x03E2 <= ord(c) <= 0x03EF))
         if unmapped:
             print(f"Warning: Unmapped Coptic characters found: {unmapped}")
+
         return result
 
     def _apply_contextual_rules(self, text):
         """
-        Apply context-sensitive transliteration rules
+        Apply context-sensitive transliteration rules based on Greco-Bohairic pronunciation
         """
-        # Alpha contextual rules
-        text = re.sub(r"ⲁ(?=ⲥ\b)", "æ", text)  # ⲁ -> æ before ⲥ at word boundary
-        text = re.sub(r"ⲁ(?=\b)", "ə", text)  # ⲁ -> ə at word boundary
-        text = re.sub(r"ⲁ", "ɑː", text)  # ⲁ -> ɑː elsewhere
+        # Upsilon (ⲩ) contextual rules - must happen before Alpha/Ei mappings
+        # ⲩ -> v after ⲁ (a) or ⲉ (e)
+        text = re.sub(r"([ⲁⲉ])ⲩ", r"\1v", text)
+
+        # Standardize Ou early
+        text = re.sub(r"ⲟⲩ", "ou", text)             # ⲟⲩ -> ou
 
         # Veeta (ⲃ) contextual rules
-        text = re.sub(r"ⲃ(?=ⲓⲙ\b)", "b", text)  # ⲃ -> b before ⲓⲙ at word boundary
-        text = re.sub(r"ⲃ(?=ⲧ\b)", "v", text)  # ⲃ -> v before ⲧ at word boundary
-        text = re.sub(r"ⲃ(?=[ⲁⲟⲱⲓⲏⲉ])", "v", text)  # ⲃ -> v before vowels
-        text = re.sub(r"ⲃ(?=ⲣ)", "b", text)  # ⲃ -> b before ⲣ
-        text = re.sub(r"ⲃ(?=ⲥ)", "b", text)  # ⲃ -> b before ⲥ
-        text = re.sub(r"ⲃ(?=\b)", "b", text)  # ⲃ -> b at word boundary
+        text = re.sub(r"ⲃ(?=[ⲁⲉⲓⲏⲟⲩⲱ])", "v", text)  # ⲃ -> v before vowels
+        text = re.sub(r"ⲃ", "b", text)               # ⲃ -> b elsewhere
 
         # Gamma (ⲅ) contextual rules
-        text = re.sub(r"ⲅ(?=ⲅ)", "n", text)  # ⲅ -> n before ⲅ
-        text = re.sub(r"ⲅ(?=ⲓ)", "g", text)  # ⲅ -> g before ⲓ
-        text = re.sub(r"ⲅ(?=ⲉ)", "g", text)  # ⲅ -> g before ⲉ
-        text = re.sub(r"ⲅ", "gh", text)  # ⲅ -> gh elsewhere
+        # ⲅ -> n before another ⲅ (ng)
+        text = re.sub(r"ⲅ(?=ⲅ)", "n", text)
+        # ⲅ -> g before front vowels
+        text = re.sub(r"ⲅ(?=[ⲓⲉⲏⲩ])", "g", text)
+        text = re.sub(r"ⲅ", "gh", text)              # ⲅ -> gh elsewhere
 
-        # Eeta (ⲏ) contextual rules
-        text = re.sub(r"ⲉ(ⲏ)", r"ey", text)  # ⲉⲏ -> ey
+        # Chi (ⲭ) contextual rules
+        # ⲭ -> sh before front vowels
+        text = re.sub(r"ⲭ(?=[ⲉⲏⲓⲩ])", "sh", text)
+        text = re.sub(r"ⲭ", "kh", text)              # ⲭ -> kh elsewhere
 
-        # Ei contextual rules
-        text = re.sub(r"ⲉ(?=ⲟ)", "eɪ", text)  # ⲉ -> eɪ before ⲟ
-        text = re.sub(r"ⲏ", "ee", text)  # ⲏ -> ee (general case)
+        # Consonant softening rules (Greek influence)
+        # ⲧ -> d after ⲛ (e.g., Pantokrator -> Pandokrator)
+        text = re.sub(r"(?<=ⲛ)ⲧ", "d", text)
+        # ⲡ -> b after ⲙ (e.g., Ampelon -> Ambelon)
+        text = re.sub(r"(?<=ⲙ)ⲡ", "b", text)
 
-        # Multi-character sequences
+        # Multi-character sequences (double consonants)
         text = re.sub(r"ⲕⲕ", "kk", text)
         text = re.sub(r"ⲙⲙ", "mm", text)
         text = re.sub(r"ⲛⲛ", "nn", text)
-        text = re.sub(r"ⲟⲓⲁ", "ia", text)
-        text = re.sub(r"ⲟⲩⲱ", "o'o", text)
 
         return text
 
@@ -147,9 +130,19 @@ def translit(text):
     return transliterator.translit(text)
 
 
-# Example usage
+# Example usage/Testing
 if __name__ == "__main__":
-    # Test with some Coptic text
-    test_text = "ⲁⲛⲟⲕ ⲟⲩⲛ ⲟⲩⲙⲁⲓⲛⲟⲩⲧⲉ"
-    print(f"Original: {test_text}")
-    print(f"Transliterated: {translit(test_text)}")
+    tests = {
+        "ⲉⲩⲁⲅⲅⲉⲗⲓⲟⲛ": "evangelion",       # Upsilon as 'v', double gamma as 'ng'
+        "ⲡⲁⲛⲧⲟⲕⲣⲁⲧⲱⲣ": "pandokrator",      # Tav softening after Ni, Omega to 'o'
+        "ⲁⲙⲡⲉⲗⲟⲛ": "ambelon",            # Pi softening after Mey
+        "ⲭⲉⲣⲉ": "shere",                 # Chi as 'sh' before 'e'
+        "ⲭⲣⲓⲥⲧⲟⲥ": "khristos",            # Chi as 'kh' before consonant
+        "ⲛ̀ⲑⲟⲕ": "enthok",                 # Jinkim becoming 'e'
+    }
+
+    print("Running phonetic tests...")
+    for coptic, expected in tests.items():
+        result = translit(coptic)
+        status = "✅" if result == expected else f"❌ (Expected: {expected})"
+        print(f"{coptic.ljust(15)} -> {result.ljust(15)} {status}")
