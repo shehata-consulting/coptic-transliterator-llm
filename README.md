@@ -2,6 +2,7 @@
 
 > A modern web-based tool for transliterating Coptic text to Latin script, enhanced with Google's Gemini 2.5 Flash Lite AI model. **Live Application:** (https://coptic-transliterator-llm.streamlit.app/)
 
+[![CI](https://github.com/shehata-consulting/coptic-transliterator-llm/actions/workflows/ci.yml/badge.svg)](https://github.com/shehata-consulting/coptic-transliterator-llm/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 
@@ -9,12 +10,14 @@
 
 ## ✨ Features
 
-- **🖊️ Flexible Input**: Enter Coptic text directly or upload `.txt` files.
+- **🖊️ Flexible Input**: Enter Coptic text directly, upload `.txt` files, or build text with the on-screen Coptic character palette (no Coptic keyboard needed).
 - **✨ AI-Enhanced**: Combines rule-based transliteration with Google's Gemini 2.5 Flash Lite model for superior accuracy and context-aware results.
+- **📖 Interlinear View**: Each Latin word rendered directly under its Coptic word — ideal for following along in church services.
+- **📚 Text Library**: Common liturgical texts (Lord's Prayer, Trisagion, Kyrie eleison, …) one click away, community-maintained in `texts/library.json`.
+- **🗣️ Pronunciation Guide**: Built-in letter-by-letter Greco-Bohairic pronunciation reference with IPA.
 - **📊 Side-by-Side Comparison**: View both rule-based and AI-enhanced results simultaneously.
-- **📱 User-Friendly**: Clean, modern Streamlit interface.
-- **⬇️ Export Ready**: Download individual or combined transliteration results as `.txt` files.
-- **🚀 Fast & Reliable**: Rule-based fallback ensures the tool always works even if the API is unreachable.
+- **⬇️ Export Ready**: Download results as `.txt`, or export the interlinear view as a printable page for service bulletins.
+- **🚀 Fast & Reliable**: The rule-based engine handles everything on its own when no API key is configured or the API is unreachable — the tool never goes down.
 
 ---
 
@@ -87,12 +90,18 @@
 
 ```
 coptic-transliterator-llm/
-├── app.py                 # Main Streamlit application
-├── transliterator.py      # Core transliteration logic
-├── requirements.txt       # Python dependencies
-├── .env.example          # Environment variables template
-├── LICENSE               # MIT License
-└── README.md             # This file
+├── app.py                    # Main Streamlit application (UI only)
+├── transliterator.py         # Rule-based Greco-Bohairic engine
+├── text_utils.py             # Pure helpers: chunking, LLM output cleaning, interlinear pairing
+├── texts/library.json        # Community-maintained liturgical text library
+├── tests/                    # Pytest suite (run: python -m pytest)
+├── .streamlit/config.toml    # Theme (committed; secrets.toml is not)
+├── .github/workflows/ci.yml  # Lint + tests on every push and PR
+├── requirements.txt          # App dependencies
+├── requirements-dev.txt      # pytest + ruff
+├── .env.example              # Environment variables template
+├── LICENSE                   # MIT License
+└── README.md                 # This file
 ```
 
 ---
@@ -172,7 +181,7 @@ print(latin_text)  # Output: pnoute
 |--------|------------|-------------|---------|
 | ⲡⲛⲟⲩⲧⲉ | pnoute | pnoute | God |
 | ⲧⲉⲕⲕⲗⲏⲥⲓⲁ | tekklesia | tekklesia | Church |
-| ⲁⲅⲁⲡⲏ | agape | agape | Love |
+| ⲁⲅⲁⲡⲏ | aghape | agape | Love |
 | ⲙⲁⲣⲓⲁ | maria | maria | Mary |
 
 ### Usage in Code

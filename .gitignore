@@ -7,8 +7,8 @@ __pycache__/
 *.pyo
 *.pyd
 
-# Streamlit specific files
-.streamlit/
+# Streamlit secrets (config.toml IS committed — it holds the theme)
+.streamlit/secrets.toml
 *.streamlit_cache/
 
 # Virtual environment
