@@ -53,8 +53,19 @@ class CopticTransliterator:
         """
         Transliterate Coptic text to Latin script
         """
+        result, _ = self.translit_with_warnings(text)
+        return result
+
+    def translit_with_warnings(self, text):
+        """
+        Transliterate Coptic text to Latin script.
+
+        Returns (result, unmapped) where unmapped is a string of distinct
+        Coptic characters that had no mapping and passed through unchanged —
+        callers (e.g. the UI) decide how to surface them.
+        """
         if not text:
-            return ""
+            return "", ""
 
         # 1. Normalize input to decompose combining characters and lowercase immediately
         text = unicodedata.normalize("NFKD", text).lower()
@@ -73,13 +84,11 @@ class CopticTransliterator:
         for coptic_char, latin_char in self.char_map.items():
             result = result.replace(coptic_char, latin_char)
 
-        # 6. Warn about unmapped Coptic characters (Unicode blocks 2C80-2CFF and 03E2-03EF)
-        unmapped = "".join(c for c in result if (
-            0x2C80 <= ord(c) <= 0x2CFF) or (0x03E2 <= ord(c) <= 0x03EF))
-        if unmapped:
-            print(f"Warning: Unmapped Coptic characters found: {unmapped}")
+        # 6. Collect unmapped Coptic characters (Unicode blocks 2C80-2CFF and 03E2-03EF)
+        unmapped = "".join(dict.fromkeys(c for c in result if (
+            0x2C80 <= ord(c) <= 0x2CFF) or (0x03E2 <= ord(c) <= 0x03EF)))
 
-        return result
+        return result, unmapped
 
     def _apply_contextual_rules(self, text):
         """
@@ -128,6 +137,10 @@ transliterator = CopticTransliterator()
 
 def translit(text):
     return transliterator.translit(text)
+
+
+def translit_with_warnings(text):
+    return transliterator.translit_with_warnings(text)
 
 
 # Example usage/Testing
