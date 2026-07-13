@@ -1,9 +1,14 @@
 [theme]
 base = "dark"
-primaryColor = "#6366f1"
-backgroundColor = "#0f1115"
-secondaryBackgroundColor = "#1a1d24"
-textColor = "#e2e8f0"
+primaryColor = "#7C6CF0"
+backgroundColor = "#0B0D12"
+secondaryBackgroundColor = "#151823"
+textColor = "#E6E9F0"
+linkColor = "#98A7F8"
+borderColor = "#232839"
+baseRadius = "0.75rem"
+font = "Inter, -apple-system, 'Segoe UI', sans-serif"
+headingFont = "Inter, -apple-system, 'Segoe UI', sans-serif"
 
 [server]
 maxUploadSize = 5

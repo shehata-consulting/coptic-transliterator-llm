@@ -79,17 +79,23 @@ def llm_transliterate(text: str) -> Optional[str]:
             - ⲙⲁⲣⲓⲁ → maria
 
             Transliterate this Coptic text to Latin script: {chunk}"""
-        try:
-            response = get_client().models.generate_content(
-                model="gemini-2.5-flash-lite",
-                contents=prompt,
-                config=types.GenerateContentConfig(
-                    system_instruction=SYSTEM_INSTRUCTION,
-                    temperature=0.1,
-                ),
-            )
-        except Exception as e:
-            logger.error(f"Gemini request failed: {e}")
+        response = None
+        for attempt in range(2):  # one retry: 503s during demand spikes are common
+            try:
+                response = get_client().models.generate_content(
+                    model="gemini-2.5-flash-lite",
+                    contents=prompt,
+                    config=types.GenerateContentConfig(
+                        system_instruction=SYSTEM_INSTRUCTION,
+                        temperature=0.1,
+                    ),
+                )
+                break
+            except Exception as e:
+                logger.error(f"Gemini request failed (attempt {attempt + 1}): {e}")
+                if attempt == 0:
+                    time.sleep(2)
+        if response is None:
             return None
 
         cleaned = clean_llm_output(response.text)
@@ -165,43 +171,87 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# Colors come from .streamlit/config.toml; CSS here only covers what the
-# theme can't: the Coptic font and the interlinear layout.
+# Colors, radii, and fonts come from .streamlit/config.toml; CSS here covers
+# what the theme can't: font loading, the hero, and the interlinear layout.
 st.markdown(
     """
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Coptic&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Coptic&display=swap');
 
+    /* Hide Streamlit chrome for a cleaner page */
+    #MainMenu, footer { visibility: hidden; }
+    [data-testid="stDecoration"] { display: none; }
+
+    /* Hero header */
+    .hero { padding: .4rem 0 .2rem 0; }
+    .hero-badges { display: flex; gap: .5rem; margin-bottom: 1rem; flex-wrap: wrap; }
+    .hero-badges span {
+        font-size: .7rem; font-weight: 600; text-transform: uppercase;
+        letter-spacing: .07em; color: #A5B0FF;
+        background: rgba(124, 108, 240, .12);
+        border: 1px solid rgba(124, 108, 240, .35);
+        padding: .28rem .7rem; border-radius: 999px;
+    }
+    .hero h1 {
+        font-size: 2.5rem; font-weight: 800; letter-spacing: -.03em;
+        line-height: 1.12; margin: 0 0 .5rem 0; padding: 0;
+    }
+    .hero h1 .grad {
+        background: linear-gradient(90deg, #8B7CF8 0%, #C084FC 100%);
+        -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+    .hero p { color: #97A0B5; font-size: 1.02rem; margin: 0 0 .4rem 0; max-width: 44rem; }
+
+    /* Coptic input */
     .stTextArea textarea {
-        font-family: 'Noto Sans Coptic', 'Segoe UI', sans-serif !important;
-        font-size: 18px !important;
-        line-height: 1.8 !important;
+        font-family: 'Noto Sans Coptic', 'Inter', sans-serif !important;
+        font-size: 17px !important;
+        line-height: 1.9 !important;
     }
 
+    /* Coptic showcase block (Text Library) */
     .coptic-display {
-        font-family: 'Noto Sans Coptic', 'Segoe UI', sans-serif;
-        font-size: 1.4rem;
+        font-family: 'Noto Sans Coptic', 'Inter', sans-serif;
+        font-size: 1.5rem;
         line-height: 2;
-        background-color: #1a1d24;
-        border: 1px solid #2d3139;
-        border-radius: 10px;
-        padding: 1rem 1.25rem;
+        background-color: #151823;
+        border: 1px solid #232839;
+        border-radius: 12px;
+        padding: 1.1rem 1.35rem;
         margin: .5rem 0 1rem 0;
     }
 
+    /* Interlinear view */
     .interlinear {
-        background-color: #1a1d24;
-        border: 1px solid #2d3139;
-        border-radius: 10px;
-        padding: 1.25rem 1.5rem;
+        background-color: #151823;
+        border: 1px solid #232839;
+        border-radius: 12px;
+        padding: 1.4rem 1.6rem;
         margin: .5rem 0;
     }
-    .il-line { display: flex; flex-wrap: wrap; gap: .3rem 1.4rem; margin-bottom: 1.2rem; }
-    .il-word { display: flex; flex-direction: column; align-items: center; }
-    .il-cop { font-family: 'Noto Sans Coptic', 'Segoe UI', sans-serif;
-              font-size: 1.45rem; line-height: 1.5; color: #f8fafc; }
-    .il-lat { font-size: .92rem; color: #94a3b8; }
+    .il-line { display: flex; flex-wrap: wrap; gap: .3rem 1.35rem; margin-bottom: 1.15rem; }
+    .il-word {
+        display: flex; flex-direction: column; align-items: center;
+        padding: .15rem .35rem; border-radius: .45rem;
+        transition: background .15s ease;
+    }
+    .il-word:hover { background: rgba(124, 108, 240, .16); }
+    .il-cop { font-family: 'Noto Sans Coptic', 'Inter', sans-serif;
+              font-size: 1.45rem; line-height: 1.5; color: #F4F6FB; }
+    .il-lat { font-size: .9rem; color: #8E99B7; }
     .il-gap { height: 1rem; }
+
+    /* Button micro-interactions */
+    .stButton > button, .stDownloadButton > button {
+        transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+    }
+    .stButton > button:hover, .stDownloadButton > button:hover {
+        transform: translateY(-1px);
+    }
+    .stButton > button[kind="primary"] {
+        box-shadow: 0 6px 22px rgba(124, 108, 240, .28);
+        font-weight: 600;
+    }
 </style>
 """,
     unsafe_allow_html=True,
@@ -233,7 +283,7 @@ with st.sidebar:
     )
     st.markdown("---")
 
-    st.markdown("### 🔌 AI Model Status")
+    st.markdown("### AI Model Status")
     if GEMINI_API_KEY:
         st.success("AI enhancement available")
         st.caption("Gemini 2.5 Flash Lite adds context-aware refinements.")
@@ -261,10 +311,18 @@ with st.sidebar:
 
 # ─── Header ──────────────────────────────────────────────────────────────────
 
-st.title("Coptic Transliteration Tool")
-st.caption(
-    "Transliterate Coptic text to Latin script — rule-based Greco-Bohairic "
-    "phonetics, optionally refined by AI. Made with ❤️ for the Coptic community."
+st.markdown(
+    """
+<div class="hero">
+    <div class="hero-badges">
+        <span>Free forever</span><span>Open source</span><span>AI-enhanced</span>
+    </div>
+    <h1>Coptic <span class="grad">Transliteration</span></h1>
+    <p>Follow along with Coptic church services — rule-based Greco-Bohairic
+    phonetics, optionally refined by AI. Made with ❤️ for the Coptic community.</p>
+</div>
+""",
+    unsafe_allow_html=True,
 )
 
 tab_main, tab_library, tab_guide, tab_about = st.tabs(
@@ -288,13 +346,13 @@ with tab_main:
     col_input, col_results = st.columns([1, 1], gap="large")
 
     with col_input:
-        st.markdown("##### 📝 Input")
+        st.markdown("##### Input")
 
         examples = [("ⲡⲛⲟⲩⲧⲉ", "God"), ("ⲧⲉⲕⲕⲗⲏⲥⲓⲁ", "Church"), ("ⲁⲅⲁⲡⲏ", "Love")]
         ex_cols = st.columns(len(examples))
         for i, (coptic, english) in enumerate(examples):
             ex_cols[i].button(
-                f"{coptic}\n({english})",
+                f"{coptic} · {english}",
                 key=f"example_{i}",
                 use_container_width=True,
                 help=f"Load example: {coptic} ({english})",
@@ -347,7 +405,12 @@ with tab_main:
             help="A .txt file containing Coptic text (UTF-8)",
         )
 
-        if st.button("🚀 Transliterate", type="primary", use_container_width=True):
+        if st.button(
+            "Transliterate",
+            key="transliterate_btn",
+            type="primary",
+            use_container_width=True,
+        ):
             processing_text = ""
             if st.session_state.text_input and st.session_state.text_input.strip():
                 processing_text = st.session_state.text_input.strip()
@@ -399,7 +462,7 @@ with tab_main:
                 st.warning("⚠️ Please enter text or upload a file first.")
 
     with col_results:
-        st.markdown("##### 📊 Results")
+        st.markdown("##### Results")
 
         results = st.session_state.get("results", {})
         if results.get("has_results"):
@@ -426,33 +489,19 @@ with tab_main:
                     "rule-based result, which always works."
                 )
 
-            view = st.radio(
+            view = st.segmented_control(
                 "View",
-                ["Side by side", "Interlinear"],
-                horizontal=True,
+                ["Text", "Interlinear"],
+                default="Text",
                 label_visibility="collapsed",
             )
 
-            if view == "Side by side":
-                st.markdown("**📝 Rule-based**")
-                st.text_area(
-                    "Rule-based transliteration",
-                    value=rule_based_output,
-                    height=120,
-                    disabled=True,
-                    key="rule_result_display",
-                    label_visibility="collapsed",
-                )
+            if view != "Interlinear":
+                st.markdown("**Rule-based**")
+                st.code(rule_based_output, language=None, wrap_lines=True)
                 if llm_output:
-                    st.markdown("**✨ AI-enhanced (Gemini 2.5 Flash Lite)**")
-                    st.text_area(
-                        "AI-enhanced transliteration",
-                        value=llm_output,
-                        height=120,
-                        disabled=True,
-                        key="ai_result_display",
-                        label_visibility="collapsed",
-                    )
+                    st.markdown("**AI-enhanced** · Gemini 2.5 Flash Lite")
+                    st.code(llm_output, language=None, wrap_lines=True)
                     if llm_output != rule_based_output:
                         st.caption(
                             "💡 The two methods differ — compare and pick "
@@ -461,17 +510,17 @@ with tab_main:
             else:
                 source = rule_based_output
                 if llm_output and llm_output != rule_based_output:
-                    pick = st.radio(
+                    pick = st.segmented_control(
                         "Interlinear source",
                         ["Rule-based", "AI-enhanced"],
-                        horizontal=True,
+                        default="Rule-based",
                     )
                     if pick == "AI-enhanced":
                         source = llm_output
                 lines = interlinear_lines(processing_text, source)
                 st.markdown(interlinear_html(lines), unsafe_allow_html=True)
 
-            st.markdown("**⬇️ Download**")
+            st.markdown("**Download**")
             dl1, dl2, dl3 = st.columns(3)
             stamp = int(time.time())
             dl1.download_button(

@@ -28,8 +28,7 @@ def test_rule_based_flow_without_api_key(monkeypatch):
     assert not at.exception
 
     at.text_area(key="text_input").set_value("ⲡⲛⲟⲩⲧⲉ").run()
-    button = next(b for b in at.button if b.label == "🚀 Transliterate")
-    button.set_value(True).run()
+    at.button(key="transliterate_btn").set_value(True).run()
     assert not at.exception
     assert at.session_state["results"]["rule_based"] == "pnoute"
     assert at.session_state["results"]["llm_note"] == "no_key"
