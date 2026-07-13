@@ -91,12 +91,13 @@
 ```
 coptic-transliterator-llm/
 ├── app.py                    # Main Streamlit application (UI only)
-├── transliterator.py         # Rule-based Greco-Bohairic engine
+├── coptictranslit/           # Rule-based engine, published to PyPI as `coptictranslit`
 ├── text_utils.py             # Pure helpers: chunking, LLM output cleaning, interlinear pairing
 ├── texts/library.json        # Community-maintained liturgical text library
 ├── tests/                    # Pytest suite (run: python -m pytest)
 ├── .streamlit/config.toml    # Theme (committed; secrets.toml is not)
-├── .github/workflows/ci.yml  # Lint + tests on every push and PR
+├── .github/workflows/        # ci.yml (lint+tests) and publish.yml (PyPI on tag)
+├── pyproject.toml            # Package metadata for the PyPI release
 ├── requirements.txt          # App dependencies
 ├── requirements-dev.txt      # pytest + ruff
 ├── .env.example              # Environment variables template
@@ -133,22 +134,33 @@ response = client.models.generate_content(
 
 ## 🔧 Advanced Usage
 
-### API Integration
+### Use It in Your Own Projects (PyPI)
 
-You can use the core transliteration functions in your own projects:
+The rule-based engine ships as the [`coptictranslit`](https://pypi.org/project/coptictranslit/) package — pure Python, zero dependencies:
+
+```bash
+pip install coptictranslit
+```
 
 ```python
-from transliterator import translit
+from coptictranslit import translit, translit_with_warnings
 
-# Rule-based transliteration
-coptic_text = "ⲡⲛⲟⲩⲧⲉ"
-latin_text = translit(coptic_text)
-print(latin_text)  # Output: pnoute
+print(translit("ⲡⲛⲟⲩⲧⲉ"))          # pnoute
+print(translit("ⲉⲩⲁⲅⲅⲉⲗⲓⲟⲛ"))      # evangelion
+
+result, unmapped = translit_with_warnings("ⲡⲛⲟⲩⲧⲉ")
+```
+
+It also installs a CLI for batch work:
+
+```bash
+coptictranslit hymn.txt -o hymn_latin.txt
+echo "ⲁⲅⲁⲡⲏ" | coptictranslit
 ```
 
 ### Customization
 
-- **Character Mappings**: Modify `char_map` in `transliterator.py`
+- **Character Mappings**: Modify `char_map` in `coptictranslit/__init__.py`
 - **Contextual Rules**: Update `_apply_contextual_rules()` method
 - **UI Styling**: Customize CSS in `app.py`
 - **System Instructions**: Modify the system_instruction prompt in app.py to adjust how the LLM formats the output.

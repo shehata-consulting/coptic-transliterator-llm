@@ -1,13 +1,25 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Optimized Coptic to Latin transliterator
-Aligns with ASCII-only standard transliteration conventions and 
-incorporates Greco-Bohairic contextual phonetic rules.
+coptictranslit — rule-based Coptic to Latin transliteration.
+
+Pure Python (standard library only), following ASCII-only standard
+transliteration conventions with Greco-Bohairic contextual phonetic rules.
+This package is the canonical engine behind the Coptic Transliteration Tool
+(https://ai-coptic-transliterator.streamlit.app).
+
+Usage:
+    >>> from coptictranslit import translit
+    >>> translit("ⲡⲛⲟⲩⲧⲉ")
+    'pnoute'
 """
 
 import re
 import unicodedata
+
+__version__ = "2.0.0"
+
+__all__ = ["CopticTransliterator", "translit", "translit_with_warnings"]
 
 
 class CopticTransliterator:
@@ -70,9 +82,9 @@ class CopticTransliterator:
         # 1. Normalize input to decompose combining characters and lowercase immediately
         text = unicodedata.normalize("NFKD", text).lower()
 
-        # 2. Handle the Jinkim (grave accent \u0300) before stripping other diacritics.
+        # 2. Handle the Jinkim (grave accent ̀) before stripping other diacritics.
         # When over a consonant, it adds an 'e' sound before it (e.g., ⲛ̀ -> en).
-        text = re.sub(r"([ⲃⲅⲇⲍⲑⲕⲗⲙⲛⲝⲡⲣⲥⲧⲫⲭⲯϣϥϧϩϫϭϯ])\u0300", r"e\1", text)
+        text = re.sub(r"([ⲃⲅⲇⲍⲑⲕⲗⲙⲛⲝⲡⲣⲥⲧⲫⲭⲯϣϥϧϩϫϭϯ])̀", r"e\1", text)
 
         # 3. Remove any remaining combining diacritics (e.g., supralinear strokes over vowels)
         text = "".join(c for c in text if not unicodedata.combining(c))
@@ -141,21 +153,3 @@ def translit(text):
 
 def translit_with_warnings(text):
     return transliterator.translit_with_warnings(text)
-
-
-# Example usage/Testing
-if __name__ == "__main__":
-    tests = {
-        "ⲉⲩⲁⲅⲅⲉⲗⲓⲟⲛ": "evangelion",       # Upsilon as 'v', double gamma as 'ng'
-        "ⲡⲁⲛⲧⲟⲕⲣⲁⲧⲱⲣ": "pandokrator",      # Tav softening after Ni, Omega to 'o'
-        "ⲁⲙⲡⲉⲗⲟⲛ": "ambelon",            # Pi softening after Mey
-        "ⲭⲉⲣⲉ": "shere",                 # Chi as 'sh' before 'e'
-        "ⲭⲣⲓⲥⲧⲟⲥ": "khristos",            # Chi as 'kh' before consonant
-        "ⲛ̀ⲑⲟⲕ": "enthok",                 # Jinkim becoming 'e'
-    }
-
-    print("Running phonetic tests...")
-    for coptic, expected in tests.items():
-        result = translit(coptic)
-        status = "✅" if result == expected else f"❌ (Expected: {expected})"
-        print(f"{coptic.ljust(15)} -> {result.ljust(15)} {status}")

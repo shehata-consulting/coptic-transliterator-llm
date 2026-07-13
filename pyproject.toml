@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "coptictranslit"
+dynamic = ["version"]
+description = "Rule-based Coptic-to-Latin transliteration with Greco-Bohairic phonetic rules — pure Python, no dependencies"
+readme = "README.md"
+requires-python = ">=3.9"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Michael Shehata", email = "shehatam.dev@gmail.com" }]
+keywords = ["coptic", "transliteration", "bohairic", "linguistics", "liturgy", "unicode"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Religion",
+    "Intended Audience :: Science/Research",
+    "Programming Language :: Python :: 3",
+    "Topic :: Text Processing :: Linguistic",
+]
+
+[project.urls]
+Homepage = "https://github.com/shehata-consulting/coptic-transliterator-llm"
+"Live App" = "https://ai-coptic-transliterator.streamlit.app"
+Issues = "https://github.com/shehata-consulting/coptic-transliterator-llm/issues"
+
+[project.scripts]
+coptictranslit = "coptictranslit.__main__:main"
+
+[tool.setuptools]
+packages = ["coptictranslit"]
+
+[tool.setuptools.dynamic]
+version = { attr = "coptictranslit.__version__" }

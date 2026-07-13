@@ -4,7 +4,7 @@
 
 import pytest
 
-from transliterator import translit, translit_with_warnings
+from coptictranslit import translit, translit_with_warnings
 
 # The contextual phonetic rules the engine was built around.
 PHONETIC_CASES = [

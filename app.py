@@ -12,8 +12,8 @@ from dotenv import load_dotenv
 from google import genai
 from google.genai import types
 
+from coptictranslit import translit_with_warnings
 from text_utils import LLM_MAX_CHARS, chunk_text, clean_llm_output, interlinear_lines
-from transliterator import translit_with_warnings
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

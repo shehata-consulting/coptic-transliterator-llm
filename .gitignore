@@ -27,3 +27,8 @@ env/
 
 # Local virtual environment
 .venv/
+
+# Packaging artifacts
+dist/
+build/
+*.egg-info/
