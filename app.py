@@ -238,16 +238,16 @@ st.markdown(
 with st.sidebar:
     st.markdown(
         """
-    [![GitHub](https://img.shields.io/badge/GitHub-Repository-blue?logo=github)](https://github.com/shehatamichael/coptic-transliterator-llm)
+    [![GitHub](https://img.shields.io/badge/GitHub-Repository-blue?logo=github)](https://github.com/shehata-consulting/coptic-transliterator-llm)
     """
     )
     st.markdown("---")
     st.markdown(
         """
     ### 🤝 Contribute
-    - [Report Issues](https://github.com/shehatamichael/coptic-transliterator-llm/issues)
-    - [Submit Pull Requests](https://github.com/shehatamichael/coptic-transliterator-llm/pulls)
-    - [Fork the Project](https://github.com/shehatamichael/coptic-transliterator-llm/fork)
+    - [Report Issues](https://github.com/shehata-consulting/coptic-transliterator-llm/issues)
+    - [Submit Pull Requests](https://github.com/shehata-consulting/coptic-transliterator-llm/pulls)
+    - [Fork the Project](https://github.com/shehata-consulting/coptic-transliterator-llm/fork)
     """
     )
     st.markdown("---")
@@ -628,7 +628,7 @@ st.markdown(
         This tool is completely open source and will always be free to use!
     </p>
     <p>
-        <a href="https://github.com/shehatamichael/coptic-transliterator-llm" target="_blank" 
+        <a href="https://github.com/shehata-consulting/coptic-transliterator-llm" target="_blank" 
            style="text-decoration: none; color: white;">
             <img src="https://img.shields.io/badge/⭐_Star_on_GitHub-white?style=for-the-badge&logo=github&logoColor=black" 
                  alt="Star on GitHub">

@@ -30,7 +30,7 @@
 1. **Clone the Repository**
 
    ```bash
-   git clone https://github.com/shehatamichael/coptic-transliterator-llm.git
+   git clone https://github.com/shehata-consulting/coptic-transliterator-llm.git
    cd coptic-transliterator-llm
    ```
 
@@ -235,7 +235,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 💬 Support & Contact
 
-- **Issues**: [GitHub Issues](https://github.com/shehatamichael/coptic-transliterator-llm/issues)
+- **Issues**: [GitHub Issues](https://github.com/shehata-consulting/coptic-transliterator-llm/issues)
 - **Email**: <shehatam.dev@gmail.com>
 - **Pull Requests**: Contributions welcome!
 
@@ -243,7 +243,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙏 Acknowledgments
 
-- Based on the original [coptic-transliterator](https://github.com/shehatamichael/coptic-transliterator)
+- Based on the original [coptic-transliterator](https://github.com/shehata-consulting/coptic-transliterator)
 - Powered by [Google AI Studio](https://makersuite.google.com/)
 - Built with [Streamlit](https://streamlit.io/)
 - Special thanks to the Coptic community for feedback and support
