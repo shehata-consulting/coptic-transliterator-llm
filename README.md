@@ -91,7 +91,7 @@
 ```
 coptic-transliterator-llm/
 ├── app.py                    # Main Streamlit application (UI only)
-├── coptictranslit/           # Rule-based engine, published to PyPI as `coptictranslit`
+├── coptictranslit/           # Rule-based engine, on PyPI as `coptic-transliterator`
 ├── text_utils.py             # Pure helpers: chunking, LLM output cleaning, interlinear pairing
 ├── texts/library.json        # Community-maintained liturgical text library
 ├── tests/                    # Pytest suite (run: python -m pytest)
@@ -136,10 +136,10 @@ response = client.models.generate_content(
 
 ### Use It in Your Own Projects (PyPI)
 
-The rule-based engine ships as the [`coptictranslit`](https://pypi.org/project/coptictranslit/) package — pure Python, zero dependencies:
+The rule-based engine ships as the [`coptic-transliterator`](https://pypi.org/project/coptic-transliterator/) package — pure Python, zero dependencies (the import name is the shorter `coptictranslit`):
 
 ```bash
-pip install coptictranslit
+pip install coptic-transliterator
 ```
 
 ```python
