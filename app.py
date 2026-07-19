@@ -257,6 +257,29 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+# ─── Successor-app banner ────────────────────────────────────────────────────
+# The Expo PWA (coptic-transliterator-app) is the actively developed successor;
+# this Streamlit app stays up as the AI-enhanced fallback until Phase 2 lands
+# there. Keep the banner until then.
+
+st.markdown(
+    """
+<div style="display:flex; align-items:center; gap:.6rem; flex-wrap:wrap;
+            background: rgba(124, 108, 240, .12);
+            border: 1px solid rgba(124, 108, 240, .35);
+            border-radius: 12px; padding: .65rem 1rem; margin-bottom: 1rem;">
+  <span style="font-size:1.1rem;">🚀</span>
+  <span style="color:#E8EAF6;">
+    <strong>A new, faster app is here</strong> — installable on your phone and
+    works offline, perfect for following along in church:
+    <a href="https://coptic-transliterator-app.web.app"
+       style="color:#A5B0FF; font-weight:600;">coptic-transliterator-app.web.app</a>
+  </span>
+</div>
+""",
+    unsafe_allow_html=True,
+)
+
 # ─── Session state ───────────────────────────────────────────────────────────
 
 if "text_input" not in st.session_state:

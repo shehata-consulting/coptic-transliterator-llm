@@ -2,6 +2,8 @@
 
 > A modern web-based tool for transliterating Coptic text to Latin script, enhanced with Google's Gemini 2.5 Flash Lite AI model. **Live Application:** (https://ai-coptic-transliterator.streamlit.app/)
 
+**🚀 Successor app:** the actively developed next generation of this tool is [coptic-transliterator-app](https://github.com/shehata-consulting/coptic-transliterator-app) — an installable, offline-capable PWA at **<https://coptic-transliterator-app.web.app>**. This Streamlit app remains live as the AI-enhanced version until AI lands there too. The Python package `coptictranslit` in this repo stays the canonical rule engine (the PWA's TypeScript engine is pinned byte-identical to it by golden tests).
+
 [![CI](https://github.com/shehata-consulting/coptic-transliterator-llm/actions/workflows/ci.yml/badge.svg)](https://github.com/shehata-consulting/coptic-transliterator-llm/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
